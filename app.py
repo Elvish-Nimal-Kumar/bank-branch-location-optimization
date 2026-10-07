@@ -11,6 +11,17 @@ from streamlit_folium import st_folium
 
 
 # -----------------------------------
+# Page Configuration
+# -----------------------------------
+
+st.set_page_config(
+    page_title="Bank Branch Finder",
+    page_icon="⌖",
+    layout="wide",
+)
+
+
+# -----------------------------------
 # Load Dataset
 # -----------------------------------
 
@@ -22,13 +33,6 @@ data = pd.read_csv(
 # -----------------------------------
 # BranchFinder visual redesign
 # -----------------------------------
-
-st.set_page_config(
-    page_title="Bank Branch Finder",
-    page_icon="⌖",
-    layout="wide",
-)
-
 
 st.markdown(
     """
@@ -48,6 +52,11 @@ st.markdown(
         max-width: 1240px;
         padding: 1.5rem 2rem 4rem;
     }
+
+
+    /* -----------------------------------
+       Header
+    ----------------------------------- */
 
     .bf-header {
         margin-top: 12px;
@@ -77,6 +86,11 @@ st.markdown(
         margin-right: 9px;
     }
 
+
+    /* -----------------------------------
+       Hero
+    ----------------------------------- */
+
     .bf-hero {
         text-align: center;
         max-width: 790px;
@@ -105,6 +119,11 @@ st.markdown(
         line-height: 1.65;
     }
 
+
+    /* -----------------------------------
+       Main Panel
+    ----------------------------------- */
+
     .bf-panel {
         background: #fff;
         border: 1px solid #e4e8ef;
@@ -120,12 +139,22 @@ st.markdown(
         margin-bottom: 10px;
     }
 
+
+    /* -----------------------------------
+       Inputs
+    ----------------------------------- */
+
     div[data-baseweb="input"] > div,
     div[data-baseweb="select"] > div {
         border-color: #e4e8ef !important;
         border-radius: 12px !important;
         background: #fff !important;
     }
+
+
+    /* -----------------------------------
+       Buttons
+    ----------------------------------- */
 
     .stButton > button {
         border-radius: 11px;
@@ -153,9 +182,19 @@ st.markdown(
         border-color: #1d4ed8;
     }
 
+
+    /* -----------------------------------
+       Radio
+    ----------------------------------- */
+
     div[role="radiogroup"] {
         gap: 10px;
     }
+
+
+    /* -----------------------------------
+       Results
+    ----------------------------------- */
 
     .bf-results-title {
         color: #10233f;
@@ -168,6 +207,11 @@ st.markdown(
         color: #697386;
         font-size: 13px;
     }
+
+
+    /* -----------------------------------
+       Cards
+    ----------------------------------- */
 
     .bf-card {
         background: #fff;
@@ -264,6 +308,11 @@ st.markdown(
         margin: 2px;
     }
 
+
+    /* -----------------------------------
+       Footer
+    ----------------------------------- */
+
     .bf-footer {
         text-align: center;
         color: #697386;
@@ -306,6 +355,27 @@ if "current_latitude" not in st.session_state:
 
 if "current_longitude" not in st.session_state:
     st.session_state.current_longitude = None
+
+# FIX:
+# Store all form values so they remain available
+# after Streamlit reruns.
+
+if "location_option" not in st.session_state:
+    st.session_state.location_option = (
+        "Use My Current Location"
+    )
+
+if "latitude_input" not in st.session_state:
+    st.session_state.latitude_input = ""
+
+if "longitude_input" not in st.session_state:
+    st.session_state.longitude_input = ""
+
+if "bank_preference" not in st.session_state:
+    st.session_state.bank_preference = "Any"
+
+if "max_distance" not in st.session_state:
+    st.session_state.max_distance = "10"
 
 
 # -----------------------------------
@@ -352,21 +422,23 @@ if not st.session_state.show_results:
     )
 
 
-# -----------------------------------
-# Customer Location
-# -----------------------------------
-
-if not st.session_state.show_results:
+    # -----------------------------------
+    # Customer Location
+    # -----------------------------------
 
     st.subheader("Where are you?")
 
     location_option = st.radio(
         "Choose your location method",
+
         [
             "Use My Current Location",
             "Enter Coordinates"
         ],
-        horizontal=True
+
+        horizontal=True,
+
+        key="location_option"
     )
 
 
@@ -381,9 +453,10 @@ if not st.session_state.show_results:
             "when your browser asks for permission."
         )
 
-        location_button_col, location_status_col = st.columns(
-            [1, 3]
+        location_button_col, location_status_col = (
+            st.columns([1, 3])
         )
+
 
         with location_button_col:
 
@@ -422,9 +495,11 @@ if not st.session_state.show_results:
         with location_status_col:
 
             if (
-                st.session_state.current_latitude is not None
+                st.session_state.current_latitude
+                is not None
                 and
-                st.session_state.current_longitude is not None
+                st.session_state.current_longitude
+                is not None
             ):
 
                 st.success(
@@ -438,20 +513,30 @@ if not st.session_state.show_results:
 
     else:
 
-        latitude_col, longitude_col = st.columns(2)
+        latitude_col, longitude_col = (
+            st.columns(2)
+        )
+
 
         with latitude_col:
 
             latitude_input = st.text_input(
                 "Latitude",
-                placeholder="Example: 13.0827"
+
+                placeholder="Example: 13.0827",
+
+                key="latitude_input"
             )
+
 
         with longitude_col:
 
             longitude_input = st.text_input(
                 "Longitude",
-                placeholder="Example: 80.2707"
+
+                placeholder="Example: 80.2707",
+
+                key="longitude_input"
             )
 
 
@@ -464,16 +549,23 @@ if not st.session_state.show_results:
         unsafe_allow_html=True
     )
 
-    st.subheader("Which bank do you prefer?")
+    st.subheader(
+        "Which bank do you prefer?"
+    )
+
 
     bank_preference = st.radio(
         "Bank Preference",
+
         [
             "Any",
             "Public",
             "Private"
         ],
-        horizontal=True
+
+        horizontal=True,
+
+        key="bank_preference"
     )
 
 
@@ -486,9 +578,13 @@ if not st.session_state.show_results:
         unsafe_allow_html=True
     )
 
+
     max_distance = st.text_input(
         "Maximum Distance (km)",
-        value="10"
+
+        value="10",
+
+        key="max_distance"
     )
 
 
@@ -501,10 +597,12 @@ if not st.session_state.show_results:
         unsafe_allow_html=True
     )
 
+
     st.markdown(
         '<div class="bf-primary">',
         unsafe_allow_html=True
     )
+
 
     if st.button(
         "Find Recommended Banks",
@@ -512,6 +610,7 @@ if not st.session_state.show_results:
     ):
 
         st.session_state.show_results = True
+
 
     st.markdown(
         "</div>",
@@ -535,11 +634,38 @@ if st.session_state.show_results:
     longitude = None
 
 
+    # FIX:
+    # Recover the values after Streamlit reruns.
+
+    location_option = (
+        st.session_state.location_option
+    )
+
+    latitude_input = (
+        st.session_state.latitude_input
+    )
+
+    longitude_input = (
+        st.session_state.longitude_input
+    )
+
+    bank_preference = (
+        st.session_state.bank_preference
+    )
+
+    max_distance = (
+        st.session_state.max_distance
+    )
+
+
     # -----------------------------------
     # Use Current Location
     # -----------------------------------
 
-    if location_option == "Use My Current Location":
+    if (
+        location_option
+        == "Use My Current Location"
+    ):
 
         latitude = (
             st.session_state.current_latitude
@@ -548,6 +674,7 @@ if st.session_state.show_results:
         longitude = (
             st.session_state.current_longitude
         )
+
 
         if (
             latitude is None
@@ -602,6 +729,7 @@ if st.session_state.show_results:
                 longitude_input
             )
 
+
         except ValueError:
 
             st.error(
@@ -614,9 +742,15 @@ if st.session_state.show_results:
             st.stop()
 
 
-        # Validate latitude
+        # -----------------------------------
+        # Validate Latitude
+        # -----------------------------------
 
-        if latitude < -90 or latitude > 90:
+        if (
+            latitude < -90
+            or
+            latitude > 90
+        ):
 
             st.error(
                 "Latitude must be between "
@@ -628,9 +762,15 @@ if st.session_state.show_results:
             st.stop()
 
 
-        # Validate longitude
+        # -----------------------------------
+        # Validate Longitude
+        # -----------------------------------
 
-        if longitude < -180 or longitude > 180:
+        if (
+            longitude < -180
+            or
+            longitude > 180
+        ):
 
             st.error(
                 "Longitude must be between "
@@ -651,6 +791,7 @@ if st.session_state.show_results:
         max_distance = float(
             max_distance
         )
+
 
     except ValueError:
 
@@ -678,11 +819,22 @@ if st.session_state.show_results:
     # Calculate Distance
     # -----------------------------------
 
+    # FIX:
+    # Work on a copy instead of modifying
+    # the original dataset.
+
     recommendation_data = data.copy()
 
+
     customer_location = np.radians(
-        [[latitude, longitude]]
+        [
+            [
+                latitude,
+                longitude
+            ]
+        ]
     )
+
 
     branch_locations = np.radians(
         recommendation_data[
@@ -693,6 +845,7 @@ if st.session_state.show_results:
         ].values
     )
 
+
     distances = (
         haversine_distances(
             customer_location,
@@ -700,6 +853,7 @@ if st.session_state.show_results:
         )
         * 6371
     )
+
 
     recommendation_data[
         "customer_distance_km"
@@ -712,28 +866,45 @@ if st.session_state.show_results:
 
     if bank_preference == "Public":
 
-        recommendation_data = recommendation_data[
-            recommendation_data["bank_group"]
-            == "Public Sector Banks"
-        ].copy()
+        recommendation_data = (
+            recommendation_data[
+                recommendation_data[
+                    "bank_group"
+                ]
+                ==
+                "Public Sector Banks"
+            ]
+            .copy()
+        )
 
 
     elif bank_preference == "Private":
 
-        recommendation_data = recommendation_data[
-            recommendation_data["bank_group"]
-            == "Private Sector Banks"
-        ].copy()
+        recommendation_data = (
+            recommendation_data[
+                recommendation_data[
+                    "bank_group"
+                ]
+                ==
+                "Private Sector Banks"
+            ]
+            .copy()
+        )
 
 
     # -----------------------------------
     # Apply Maximum Distance
     # -----------------------------------
 
-    recommendation_data = recommendation_data[
-        recommendation_data["customer_distance_km"]
-        <= max_distance
-    ].copy()
+    recommendation_data = (
+        recommendation_data[
+            recommendation_data[
+                "customer_distance_km"
+            ]
+            <= max_distance
+        ]
+        .copy()
+    )
 
 
     # -----------------------------------
@@ -760,13 +931,15 @@ if st.session_state.show_results:
     ] = (
         recommendation_data[
             "suitability_score"
-        ] * 0.7
+        ]
+        * 0.7
 
         +
 
         recommendation_data[
             "distance_score"
-        ] * 30
+        ]
+        * 30
     )
 
 
@@ -823,7 +996,10 @@ if st.session_state.show_results:
             "the selected distance."
         )
 
-        if st.button("← Change Search"):
+
+        if st.button(
+            "← Change Search"
+        ):
 
             st.session_state.show_results = False
 
@@ -831,14 +1007,16 @@ if st.session_state.show_results:
 
 
     # -----------------------------------
-    # Recommendation + Map Layout
+    # Recommendation Cards + Map
     # -----------------------------------
 
     else:
 
-        left_col, right_col = st.columns(
-            [1, 1.35],
-            gap="large"
+        left_col, right_col = (
+            st.columns(
+                [1, 1.35],
+                gap="large"
+            )
         )
 
 
@@ -849,60 +1027,80 @@ if st.session_state.show_results:
         with left_col:
 
             for index, (_, row) in enumerate(
-                recommendations.head(10).iterrows()
+                recommendations
+                .head(10)
+                .iterrows()
             ):
 
                 reasons = []
 
 
-                if row[
-                    "customer_distance_km"
-                ] <= 2:
+                if (
+                    row[
+                        "customer_distance_km"
+                    ]
+                    <= 2
+                ):
 
                     reasons.append(
                         "Very close to you"
                     )
 
 
-                if row[
-                    "nearest_bus_km"
-                ] <= 2:
+                if (
+                    row[
+                        "nearest_bus_km"
+                    ]
+                    <= 2
+                ):
 
                     reasons.append(
                         "Good bus access"
                     )
 
 
-                if row[
-                    "nearest_railway_km"
-                ] <= 3:
+                if (
+                    row[
+                        "nearest_railway_km"
+                    ]
+                    <= 3
+                ):
 
                     reasons.append(
                         "Good railway access"
                     )
 
 
-                if row[
-                    "nearest_metro_km"
-                ] <= 2:
+                if (
+                    row[
+                        "nearest_metro_km"
+                    ]
+                    <= 2
+                ):
 
                     reasons.append(
                         "Metro access nearby"
                     )
 
 
-                if row[
-                    "nearest_major_road_km"
-                ] <= 0.2:
+                if (
+                    row[
+                        "nearest_major_road_km"
+                    ]
+                    <= 0.2
+                ):
 
                     reasons.append(
                         "Good road accessibility"
                     )
 
 
-                if row[
-                    "suitability_score"
-                ] >= 80:
+                if (
+                    row[
+                        "suitability_score"
+                    ]
+                    >= 80
+                ):
 
                     reasons.append(
                         "Strong overall accessibility"
@@ -919,10 +1117,10 @@ if st.session_state.show_results:
                 reason_html = "".join(
                     f"""
                     <span class="bf-reason">
-                        ✓ {r}
+                        ✓ {reason}
                     </span>
                     """
-                    for r in reasons[:3]
+                    for reason in reasons[:3]
                 )
 
 
@@ -965,7 +1163,7 @@ if st.session_state.show_results:
                                 display:flex;
                                 justify-content:space-between;
                                 align-items:center;
-                                margin:14px 0 10px
+                                margin:14px 0 10px;
                             ">
 
 
@@ -1009,12 +1207,15 @@ if st.session_state.show_results:
                                     Nearest Bus
 
                                     <b>
+
                                         {
                                             row[
                                                 "nearest_bus_km"
                                             ]:.2f
                                         }
+
                                         km
+
                                     </b>
 
                                 </span>
@@ -1025,12 +1226,15 @@ if st.session_state.show_results:
                                     Nearest Railway
 
                                     <b>
+
                                         {
                                             row[
                                                 "nearest_railway_km"
                                             ]:.2f
                                         }
+
                                         km
+
                                     </b>
 
                                 </span>
@@ -1041,12 +1245,15 @@ if st.session_state.show_results:
                                     Nearest Metro
 
                                     <b>
+
                                         {
                                             row[
                                                 "nearest_metro_km"
                                             ]:.2f
                                         }
+
                                         km
+
                                     </b>
 
                                 </span>
@@ -1057,12 +1264,15 @@ if st.session_state.show_results:
                                     Nearest Major Road
 
                                     <b>
+
                                         {
                                             row[
                                                 "nearest_major_road_km"
                                             ]:.2f
                                         }
+
                                         km
+
                                     </b>
 
                                 </span>
@@ -1127,6 +1337,7 @@ if st.session_state.show_results:
                     color="red",
                     icon="user"
                 )
+
             ).add_to(branch_map)
 
 
@@ -1189,6 +1400,7 @@ if st.session_state.show_results:
                             else "bank"
                         )
                     )
+
                 ).add_to(branch_map)
 
 
@@ -1211,6 +1423,10 @@ st.caption(
     "Map data © OpenStreetMap contributors."
 )
 
+
+# -----------------------------------
+# Footer
+# -----------------------------------
 
 st.markdown(
     """
